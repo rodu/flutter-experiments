@@ -1,4 +1,4 @@
-# pingmeplus
+# Flutter experiments
 
 A new Flutter project.
 
