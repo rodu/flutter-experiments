@@ -41,7 +41,9 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _biggerFont = TextStyle(fontSize: 18.0);
-  final _suggestions = <WordPair>[];
+  final _initialSuggestions = <WordPair>[];
+
+  String _filterValue = "";
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,7 @@ class _RandomWordsState extends State<RandomWords> {
         child: Column(
           children: <Widget>[
             TextField(
-              onChanged: (String val) => val,
+              onChanged: (String val) => _filterSuggestions(val),
             ),
             Expanded(child: _buildSuggestions()),
           ],
@@ -72,10 +74,36 @@ class _RandomWordsState extends State<RandomWords> {
     );
   }
 
-  Widget _buildSuggestions() {
-    _suggestions.length = 0;
-    _suggestions.addAll(generateWordPairs().take(50));
+  void _filterSuggestions(String val) {
+    setState(() {
+      _filterValue = val;
+    });
+  }
 
+  Widget _buildSuggestions() {
+    List<WordPair> _suggestions = [];
+
+    if (_filterValue == "") {
+      if (_initialSuggestions.length > 0) {
+        return _buildSuggestionsList(_initialSuggestions);
+      }
+
+      // Here we are filling in suggestions the very first time
+      _suggestions.addAll(generateWordPairs().take(50));
+      _initialSuggestions.addAll(_suggestions);
+
+      return _buildSuggestionsList(_suggestions);
+    }
+
+    // Here we need to filter the suggestions
+    _suggestions.addAll(_initialSuggestions);
+    _suggestions.removeWhere(
+        (WordPair element) => !element.asString.startsWith(_filterValue));
+
+    return _buildSuggestionsList(_suggestions);
+  }
+
+  Widget _buildSuggestionsList(List<WordPair> _suggestions) {
     return ListView(
       children: _suggestions.map((pair) => _buildRow(pair)).toList(),
     );
